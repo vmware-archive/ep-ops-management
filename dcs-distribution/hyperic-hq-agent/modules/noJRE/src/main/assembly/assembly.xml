@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+	<id>noJRE</id>
+	<formats>
+		<format>zip</format>
+		<format>tar.gz</format>
+	</formats>
+	
+	<baseDirectory>${product.name}-${project.version}</baseDirectory>
+
+	<componentDescriptors>
+    		<componentDescriptor>../../src/main/assembly/component.xml</componentDescriptor>
+    	</componentDescriptors>
+
+	<fileSets>
+	<!-- Creating an empty bundles directory, so that the tar archive would have its permissions set, as next fileSet doesn't actually store it in the tar-->
+		<fileSet>
+                        <directory>./</directory>
+                        <outputDirectory>/bundles</outputDirectory>
+                        <excludes>
+                              <exclude>*/**</exclude>
+                        </excludes>
+                        <directoryMode>0700</directoryMode>
+                </fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<filtered>true</filtered>
+			<fileMode>0600</fileMode>
+                        <directoryMode>0700</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/agent-${project.version}</directory>
+			<outputDirectory>/bundles/agent-${project.version}</outputDirectory>
+			<fileMode>0600</fileMode>
+			<directoryMode>0700</directoryMode>
+		</fileSet>
+	</fileSets>
+</assembly>

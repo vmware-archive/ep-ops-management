@@ -1,0 +1,68 @@
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
+<form-validation>
+   <global>
+      <validator name="required"
+             classname="org.hyperic.util.validator.common.CommonValidatorUtil"
+             method="validateRequired"
+             methodParams="java.lang.Object,org.apache.commons.validator.Field"
+             msg="errors.required"/>
+      <validator name="validatePrincipal"
+             classname="org.hyperic.util.validator.common.CommonValidatorUtil"
+             method="validatePrincipal"
+             methodParams="java.lang.Object,org.apache.commons.validator.Field"
+             msg="errors.principal"/>
+      <validator name="validatePwd"
+             classname="org.hyperic.util.validator.common.CommonValidatorUtil"
+             method="validatePassword"
+             methodParams="java.lang.Object,org.apache.commons.validator.Field"
+             msg="errors.pwd"/>
+      <validator name="validatePwdVer"
+             classname="org.hyperic.util.validator.common.CommonValidatorUtil"
+             method="validatePasswordVerification"
+             methodParams="java.lang.Object,org.apache.commons.validator.Field"
+             msg="errors.pwdver"/>
+   </global>
+   <formset>
+      <form name="testFormOne">
+         <field property="fieldStr1"  depends="required,validatePrincipal">
+         	   <arg0 key="testFormOne.fieldStr1.displayname"/>
+         </field>    
+      </form>
+      <form name="testFormTwo">
+         <field property="fieldStr1"  depends="required,validatePassword">
+         	   <arg0 key="testFormOne.fieldStr1.displayname"/>
+         </field>    
+         <field  property="fieldStr2" depends="required,validatePwdVer">
+         	   <arg0 key="testFormOne.fieldStr2.displayname"/>
+               <arg1 key="fieldStr1" />
+         </field>
+      </form>
+   </formset>   
+</form-validation>

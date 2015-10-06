@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+	<!-- fileMode and directoryMode should always favor owner, granting him minimally needed privileges, while preventing access from others -->
+        <fileSets>
+                <fileSet>
+                        <directory>../../src/main/resources</directory>
+                        <outputDirectory>/</outputDirectory>
+                        <excludes>
+                                <exclude>**/*.sh</exclude>
+                                <exclude>**/.gitignore</exclude>
+                                <exclude>wrapper/**/*</exclude>
+                        </excludes>
+                        <filtered>true</filtered>
+                        <fileMode>0600</fileMode>
+                        <directoryMode>0700</directoryMode>
+                </fileSet>
+                <fileSet>
+                        <directory>../../src/main/resources</directory>
+                        <outputDirectory>/</outputDirectory>
+                        <includes>
+                                <include>**/*.sh</include>
+                        </includes>
+                        <filtered>true</filtered>
+                        <fileMode>0700</fileMode>
+                        <directoryMode>0700</directoryMode>
+                </fileSet>
+		<!-- Creating an empty wrapper directory, so that the tar archive would have its permissions set, as next fileSet doesn't actually store it in the tar-->
+		<fileSet>
+			<directory>./</directory>
+			<outputDirectory>/wrapper</outputDirectory>
+			<excludes>
+				<exclude>*/**</exclude>
+			</excludes>
+			<directoryMode>0700</directoryMode>
+		</fileSet>
+                <fileSet>
+                        <directory>../../src/main/resources</directory>
+                        <outputDirectory>/</outputDirectory>
+                        <includes>
+                                <include>wrapper/**/*</include>
+                        </includes>
+                        <fileMode>0700</fileMode>
+                        <directoryMode>0700</directoryMode>
+                </fileSet>
+        </fileSets>
+</component>

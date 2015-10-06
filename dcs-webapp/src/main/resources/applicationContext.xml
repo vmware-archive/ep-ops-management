@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+    <!-- enable annotation-based beans definitions -->
+  <context:annotation-config />
+
+    <!-- Automatically scan classes for @Component, @Service, @Controller, @Repository -->
+  <context:component-scan
+    base-package="
+        com.hyperic,
+        com.vmware.epops" >
+  </context:component-scan>
+
+  <!-- Enable MVC Java config in support of processing requests with annotated
+    controller methods using annotations such as @RequestMapping, @ExceptionHandler,
+    and others. -->
+  <mvc:annotation-driven />
+
+
+    <bean id="certificateHandler" class="com.vmware.epops.util.security.CertificateHandler"/>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+        p:ignoreResourceNotFound="true">
+        <property name="locations">
+            <list>
+                <value>classpath:/epops-webapp.properties</value>
+                <value>file:${epops.prop.file}</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- Config Options Converters -->
+    <bean id="defaultConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.DefaultConfigOptionConverter" />
+
+    <bean id="enumerationConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.EnumerationConfigOptionConverter" />
+
+     <bean id="stringConfigOptionConverter"
+          class="com.vmware.epops.plugin.converter.StringConfigOptionConverter" />
+
+    <bean id="integerConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.IntegerConfigOptionConverter" />
+
+    <bean id="ipConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.IpConfigOptionConverter" />
+
+    <bean id="propertyConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.PropertyConfigOptionConverter" />
+
+    <bean id="hiddenConfigOptionConverter"
+        class="com.vmware.epops.plugin.converter.HiddenConfigOptionConverter" />
+    <!-- -->
+
+    <!-- Config Options Converters Factory -->
+    <bean id="configOptionConverterFactory"
+        class="com.vmware.epops.plugin.converter.ConfigOptionConverterFactory">
+    </bean>
+
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+	 <constructor-arg>
+        <bean class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+            <property name="readTimeout" value="20000" />
+        </bean>
+    </constructor-arg>
+	</bean>
+
+    <util:map id="configConverters" key-type="java.lang.Class">
+
+        <!-- DefaultConfigOptionConverter -->
+        <entry key="org.hyperic.util.config.ConfigOption" value-ref="defaultConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.StringConfigOption" value-ref="stringConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.DirConfigOption" value-ref="defaultConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.DoubleConfigOption" value-ref="defaultConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.LongConfigOption" value-ref="defaultConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.HiddenConfigOption" value-ref="hiddenConfigOptionConverter" />
+
+        <!-- EnumerationConfigOptionConverter -->
+        <entry key="org.hyperic.util.config.BooleanConfigOption"
+            value-ref="enumerationConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.YesNoConfigOption" value-ref="enumerationConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.EnumerationConfigOption"
+            value-ref="enumerationConfigOptionConverter" />
+
+        <!-- IntegerConfigOptionConverter -->
+        <entry key="org.hyperic.util.config.IntegerConfigOption"
+            value-ref="integerConfigOptionConverter" />
+        <entry key="org.hyperic.util.config.PortConfigOption" value-ref="integerConfigOptionConverter" />
+
+        <!-- IpAddressConfigOptionConverter -->
+        <entry key="org.hyperic.util.config.IpAddressConfigOption"
+            value-ref="ipConfigOptionConverter" />
+
+        <!-- PropertyConfigOptionConverter -->
+        <entry key="com.vmware.epops.plugin.converter.PropertyConfigOption"
+            value-ref="propertyConfigOptionConverter" />
+    </util:map>
+
+</beans>

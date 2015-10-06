@@ -1,0 +1,30 @@
+<!--
+ |
+ | This is the Maven settings.xml file for DCS.
+ |
+ |-->
+<settings>
+    <localRepository>./build/local_repo</localRepository>
+
+    <profiles>
+        <profile>
+            <id>public</id>
+            <repositories>
+                <repository>
+                    <id>hyperic-external</id>
+                    <name>Hyperic External Dependencies Repository</name>
+                    <url>http://maven.hyperic.org/external</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+	    <properties>
+		<PUBLISH_DIR>./publish</PUBLISH_DIR>
+	    </properties>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>public</activeProfile>
+    </activeProfiles>
+</settings>

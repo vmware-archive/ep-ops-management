@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.hyperic.dcs.dist</groupId>
+	<artifactId>dcs-dist</artifactId>
+	<packaging>pom</packaging>
+	<name>DSC Distribution</name>
+	<version>6.1.0</version>
+
+        <properties>
+            <product.name>epops-agent</product.name>
+            <maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
+            <build.timestamp>${maven.build.timestamp}</build.timestamp>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        </properties>
+
+	<modules>
+		<module>agent</module>
+		<module>hyperic-hq-agent</module>
+		<module>dcs-webapp-dist</module>		
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <version>2.4</version>
+                                </plugin>
+                                <plugin>
+                                        <artifactId>maven-assembly-plugin</artifactId>
+                                        <version>2.2.1</version>
+                                        <configuration>
+                                                <tarLongFileMode>gnu</tarLongFileMode>
+                                                <appendAssemblyId>false</appendAssemblyId>
+                                        </configuration>
+                                        <executions>
+                                                <execution>
+                                                        <id>package</id>
+                                                        <phase>package</phase>
+                                                        <goals>
+                                                                <goal>single</goal>
+                                                        </goals>
+                                                </execution>
+                                        </executions>
+                                </plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

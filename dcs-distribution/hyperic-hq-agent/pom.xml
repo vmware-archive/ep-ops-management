@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Previously noJRE.xml -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.dcs.dist</groupId>
+		<artifactId>dcs-dist</artifactId>
+		<version>6.1.0</version>
+	</parent>
+
+	<artifactId>dcs-packer</artifactId>
+	<packaging>pom</packaging>
+	<name>DCS Distribution - DSC Agent Packer</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-agent</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<includeGroupIds>org.hyperic.dcs.dist</includeGroupIds>
+							<includeArtifactIds>agent</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>	
+		</plugins>
+	</build>
+
+	<profiles> 
+	  
+	   <profile> 
+		<id>All-Installers</id> 
+		<activation>
+		<property><name>all-installers</name></property>
+		</activation>
+		<modules> 
+		      <!-- will use the no-JRE instead <module>modules/apple-osx</module>-->
+		      <module>modules/hyperic-hq-agent-parent</module>
+		      <module>modules/noJRE</module>
+		      <module>modules/win32</module> 
+		      <module>modules/x86-64-win</module> 
+		      <module>modules/x86-linux</module> 
+		      <module>modules/x86-64-linux</module>     
+		</modules> 
+		</profile>  
+		<profile> 
+		    <id>no-JRE</id> 
+		    <activation>
+       			<activeByDefault>true</activeByDefault>
+		    </activation>
+		    <modules> 
+			<module>modules/hyperic-hq-agent-parent</module>
+			<module>modules/noJRE</module>
+		    </modules> 
+		</profile> 
+
+	</profiles> 	
+	
+</project>
+
+
