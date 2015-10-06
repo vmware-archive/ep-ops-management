@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+<plugin name="ntds">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+  <filter name="ntds" value="NTDS:Platform=Win32"/>
+
+  <metrics name="ldap">
+    <metric indicator="true" name="Availability" template="NTDS:Type=Availability:LDAP Active Threads"/>
+    <metric category="UTILIZATION" name="LDAP Client Sessions" template="${ntds}:${name}"/>
+    <metric category="UTILIZATION" name="LDAP Active Threads" template="${ntds}:${name}"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="LDAP Writes" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="LDAP Searches" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="LDAP Successful Binds" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="LDAP New Connections" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="LDAP New SSL Connections" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="LDAP Closed Connections" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="LDAP UDP operations" template="${ntds}:${name}/sec"/>
+  </metrics>
+
+  <metrics name="ds">
+    <metric category="UTILIZATION" name="DS Threads in Use" template="${ntds}:${name}"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="DS Directory Writes" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="DS Directory Reads" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="DS Directory Searches" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="DS Client Binds" template="${ntds}:${name}/sec"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="DS Server Binds" template="${ntds}:${name}/sec"/>
+  </metrics>
+
+  <metrics name="auth">
+    <metric indicator="true" name="Availability" template="ServiceAvail:Platform=Win32:kdc"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" name="KDC AS Requests" template="%NtlmDomain%:Platform=Win32:${name}"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="KDC TGS Requests" template="%NtlmDomain%:Platform=Win32:${name}"/>
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="Kerberos Authentications" template="%NtlmDomain%:Platform=Win32:${name}"/> 
+    <metric category="THROUGHPUT" collectionType="trendsup" indicator="true" name="NTLM Authentications" template="%NtlmDomain%:Platform=Win32:${name}"/>
+  </metrics>
+
+  <metrics include="ds" name="Active Directory">
+    <metric indicator="true" name="Availability" template="%avail_domain%:%avail_key_1%=%avail_val_1%:%avail_arg_1%"/>
+  </metrics>
+
+  <server name="Active Directory" platforms="Win32">
+    <property name="EVENT_LOG_NAME" value="Directory Service"/>
+    <plugin type="measurement" class="ActiveDirectoryMeasurementPlugin"/>
+    <plugin type="log_track" class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>
+    <plugin type="autoinventory" class="ActiveDirectoryDetector"/>
+
+    <scan registry="SYSTEM\CurrentControlSet\Services\NTDS\Parameters">
+      <include name="DSA Working Directory"/>
+    </scan>
+
+    <properties>
+      <property name="Root Domain"/>
+      <property name="Root Domain"/>
+      <property name="Machine DN Name"/>
+      <property name="DSA Database file"/>
+      <property name="Schema Version" type="int"/>
+      <property name="Server Version"/>
+    </properties>
+
+    <config type ="product">
+      <option name="version" description="Version" optional="false"/>
+    </config>
+
+    <service internal="true" model="lightweight" name="LDAP">
+      <metrics include="ldap"/>
+    </service>
+
+    <service internal="true" model="lightweight" name="Authentication">
+      <metrics include="auth"/>
+    </service>
+  </server>
+</plugin>

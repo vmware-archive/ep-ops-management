@@ -1,0 +1,430 @@
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin name="vSphere-SSO" package="org.hyperic.plugin.vsphere.sso">
+    <property name="PLUGIN_VERSION" value="@project.version@" />
+
+    <server name="vSphere SSO">
+        <property name="PROC_QUERY"       value="Pid.PidFile.eq=/var/log/vmware/sso/tcserver.pid" />
+        <!-- Windows: vCenter 5.1: ssotomcat; vCenter 5.5 and 6.0: VMwareSTS -->
+        <property name="WIN32_PROC_QUERY" value="Pid.Service.re=(VMwareSTS|ssotomcat)" />
+
+        <config>
+            <option name="process.query"
+                    description="PTQL for vSphere SSO" />
+			<option name="port"
+					default="7444"
+                    description="vSphere SSO port"/>
+        </config>
+
+        <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+        <plugin type="measurement" class="MeasurementVSphereSSO" />
+        <plugin type="collector" class="HttpColector"/>
+
+        <property name="AUTOINVENTORY_NAME" value="vSphere SSO - %platform.name%" />
+
+        <property name="INVENTORY_ID"
+                  value="vSphere SSO"/>
+
+        <metric name="Availability"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=/ims/STSService?wsdl:Availability"
+                category="AVAILABILITY" units="percentage" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="URL Response Time"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=/ims/STSService?wsdl:ResponseTime"
+                category="PERFORMANCE" units="ms" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+        <metric name="Response Code"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=/ims/STSService?wsdl:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                collectionType="dynamic"
+                interval="300000"/>
+
+        <service name="Web SSO">
+            <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+            <plugin type="measurement" class="MeasurementVSphereSSO" />
+            <plugin type="collector" class="HttpColector"/>
+
+            <property name="URL_PATH" value="/websso/HealthStatus" />
+
+            <property name="AUTOINVENTORY_NAME" value="Web SSO - %platform.name%" />
+
+            <metric name="Availability"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=${URL_PATH},pattern=GREEN:Availability"
+                category="AVAILABILITY" units="percentage" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+            <metric name="URL Response Time"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=${URL_PATH},pattern=GREEN:ResponseTime"
+                category="PERFORMANCE" units="ms" indicator="true"
+                collectionType="dynamic" defaultOn="true" interval="300000" />
+
+            <metric name="Response Code"
+                template="httpC:hostname=localhost,port=%port%,ssl=true,path=${URL_PATH},pattern=GREEN:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                collectionType="dynamic"
+                interval="300000"/>
+
+        </service>
+
+        <service name="VMware Secure Token Service">
+            <property name="PROC_QUERY"
+                      value="State.Name.eq=java,Args.*.re=(/vmware-sts/|vmware-sso|VMwareSTS)" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Secure Token Service - %platform.name%" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Secure Token Service" />
+            </config>
+
+            <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+            <plugin type="measurement" class="MeasurementVSphereSSO" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Secure Token Service - %platform.name%" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Directory Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmdird" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Directory Service - %platform.name%" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Directory Service" />
+            </config>
+
+            <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+            <plugin type="measurement" class="MeasurementVSphereSSO" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Directory Service - %platform.name%" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Certificate Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmcad" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Certificate Service - %platform.name%" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Certificate Service" />
+            </config>
+
+            <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+            <plugin type="measurement" class="MeasurementVSphereSSO" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Certificate Service - %platform.name%" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Kdc Service">
+            <property name="PROC_QUERY" value="State.Name.eq=vmkdcd" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Kdc Service - %platform.name%" />
+
+            <config>
+                <option name="process.query" default="${PROC_QUERY}"
+                        description="PTQL for VMware Kdc Service" />
+            </config>
+
+            <plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+            <plugin type="measurement" class="MeasurementVSphereSSO" />
+
+            <property name="AUTOINVENTORY_NAME" value="VMware Kdc Service - %platform.name%" />
+
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+                    category="AVAILABILITY" units="percentage" indicator="true"
+                    collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware Identity Management Service">
+            <property name="PROC_QUERY"
+                      value="State.Name.eq=jsvc,Args.*.ct=vmware-idm,State.Name.Peq=jsvc" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="VMware Identity Management Service - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware Identity Management Service Daemon" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware Identity Management Service Daemon - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="VMware AFD Service">
+			<property name="PROC_QUERY" value="State.Name.eq=vmafdd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="VMware AFD Service - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for VMware AFD Service" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="VMware AFD Service - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Service Manager">
+			<property name="PROC_QUERY" value="State.Name.eq=lwsmd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise Service Manager - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Service Manager" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Service Manager - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Registry Service">
+			<property name="PROC_QUERY" value="State.Name.eq=lwregd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise Registry Service - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Registry Service" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Registry Service - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise DCE RPC End-Point Mapper">
+			<property name="PROC_QUERY" value="State.Name.eq=dcerpcd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise DCE RPC End-Point Mapper - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise DCE/RPC End-Point Mapper" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise DCE RPC End-Point Mapper - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Eventlog">
+			<property name="PROC_QUERY" value="State.Name.eq=eventlogd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise Eventlog - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Eventlog" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Eventlog - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Input-Output Service">
+			<property name="PROC_QUERY" value="State.Name.eq=lwiod" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise Input-Output Service - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Input-Output Service" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise Input-Output Service - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise NetLogon Service">
+			<property name="PROC_QUERY" value="State.Name.eq=netlogond" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise NetLogon Service - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise NetLogon Service" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+			<property name="AUTOINVENTORY_NAME" value="Likewise NetLogon Service - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+        <service name="Likewise Security and Authentication Subsystem">
+			<property name="PROC_QUERY" value="State.Name.eq=lsassd" />
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="Likewise Security and Authentication Subsystem - %platform.name%" />
+
+            <config>
+				<option name="process.query" default="${PROC_QUERY}"
+					description="PTQL for Likewise Security and Authentication Subsystem" />
+            </config>
+
+			<plugin type="autoinventory" class="DiscoveryVSphereSSO" />
+
+			<plugin type="measurement" class="MeasurementVSphereSSO" />
+
+            <property name="AUTOINVENTORY_NAME"
+				value="Likewise Security and Authentication Subsystem - %platform.name%" />
+
+			<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State"
+				category="AVAILABILITY" units="percentage" indicator="true"
+				collectionType="dynamic" defaultOn="true" interval="300000" />
+
+			&process-metrics;
+        </service>
+
+    </server>
+
+    <server name="vSphere SSO Load Balancer">
+        <config>
+            <option name="hostname"
+                    description="SSO Load Balancer Hostname"/>
+			<option name="port"
+					default="7444"
+                    description="SSO Load Balancer Port"/>
+        </config>
+
+            <property name="AUTOINVENTORY_NAME"
+                      value="vSphere SSO Load Balancer - %platform.name%" />
+
+        <plugin type="measurement" class="MeasurementVSphereSSO"/>
+        <plugin type="collector" class="HttpColector"/>
+
+        <metric name="Availability"
+                template="httpC:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="60000"/>
+
+        <metric name="Response Time"
+                template="httpC:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:ResponseTime"
+                category="PERFORMANCE"
+                units="ms"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+
+        <metric name="Response Code"
+                template="httpC:hostname=%hostname%,port=%port%,ssl=true,path=/sts/STSService?wsdl,method=GET,follow=true,pattern=REGISTERED:ResponseCode"
+                category="PERFORMANCE"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"
+                defaultOn="true"
+                interval="300000"/>
+    </server>
+</plugin>

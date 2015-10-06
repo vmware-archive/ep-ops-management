@@ -17,5 +17,14 @@
 	<module>dcs-hqagent-plugin</module>
 	<module>dcs-groovy-scripting-plugin</module>
 	<module>dcs-distribution</module>
+	<!-- Optional plugins -->
+	<module>dcs-netservices-plugin</module>
+	<module>dcs-mssql-plugin</module>
+	<module>dcs-ntds-plugin</module>
+	<module>dcs-postgresql-plugin</module>
+	<module>dcs-tcserver-plugin</module>
+	<module>dcs-tomcat-plugin</module>
+	<module>dcs-vcenter-plugin</module>
+	<module>dcs-vsphere_sso-plugin</module>
     </modules>
 </project>

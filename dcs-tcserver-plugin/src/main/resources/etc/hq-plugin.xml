@@ -1,0 +1,433 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+<!--
+
+ * Copyright (c) 2015 VMware, Inc.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License version 3 as published by the Free
+ * Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+
+. -->
+<plugin package="com.springsource.hq.plugin.tcserver" name="tcserver">
+    <property name="PLUGIN_VERSION" value="@project.version@" />
+    <classpath>
+        <include name="pdk/lib/mx4j" />
+        <include
+            name="pdk/lib/com.springsource.hq.plugin.tcserver.serverconfig.domain.jar" />
+        <include name="pdk/lib/com.springsource.javax.xml.bind-2.1.7.jar" />
+        <include name="pdk/lib/com.springsource.org.apache.xerces-2.8.1.jar" />
+        <include name="pdk/lib/org.springframework.beans-2.5.6.A.jar" />
+        <include name="pdk/lib/org.springframework.context-2.5.6.A.jar" />
+        <include name="pdk/lib/org.springframework.core-2.5.6.A.jar" />
+        <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
+        <include name="server/lib/commons-modeler-*.jar" />
+    </classpath>
+
+    <filter name="template" value="${OBJECT_NAME}:${alias}" />
+    <property name="template" value="${OBJECT_NAME}:${alias}" />
+    <property name="measurement-class"
+              value="org.hyperic.hq.product.jmx.MxMeasurementPlugin" />
+
+    <metrics name="Thread Metrics">
+        <metric name="Thread Count" alias="ThreadCount" indicator="false"
+                template="${OBJECT_NAME}:${alias}" units="none" collectionType="trendsup" />
+        <metric name="Current Thread Cpu Time" alias="CurrentThreadCpuTime"
+                indicator="false" template="${OBJECT_NAME}:${alias}" units="ms"
+                collectionType="trendsup" />
+        <metric name="Current Thread User Time" alias="CurrentThreadUserTime"
+                indicator="false" template="${OBJECT_NAME}:${alias}" units="ms"
+                collectionType="trendsup" />
+        <metric name="Daemon Thread Count" alias="DaemonThreadCount"
+                indicator="false" template="${OBJECT_NAME}:${alias}" units="none"
+                collectionType="dynamic" />
+        <metric name="Peak Thread Count" alias="PeakThreadCount"
+                indicator="false" template="${OBJECT_NAME}:${alias}" units="none"
+                collectionType="static" />
+        <metric name="Total Started Thread Count" alias="TotalStartedThreadCount"
+                indicator="false" template="${OBJECT_NAME}:${alias}" units="none"
+                collectionType="dynamic" />
+    </metrics>
+
+    <metrics name="OS Metrics">
+        <metric name="Free Swap Space Size" alias="FreeSwapSpaceSize"
+                template="${OBJECT_NAME}:${alias}" units="B" collectionType="dynamic" />
+        <metric name="Free Physical Memory Size" alias="FreePhysicalMemorySize"
+                template="${OBJECT_NAME}:${alias}" units="B" collectionType="dynamic" />
+        <metric name="Process Cpu Time" alias="ProcessCpuTime"
+                template="${OBJECT_NAME}:${alias}" units="ns" collectionType="trendsup" />
+        <metric name="Open File Descriptor Count" alias="OpenFileDescriptorCount"
+                template="${OBJECT_NAME}:${alias}" units="none" collectionType="dynamic" />
+        <metric name="System Load Average" alias="SystemLoadAverage"
+                template="${OBJECT_NAME}:${alias}" units="none" collectionType="dynamic" />
+    </metrics>
+
+    <metrics name="Runtime Metrics">
+        <metric name="UpTime" alias="Uptime" indicator="true"
+                template="${OBJECT_NAME}:${alias}" units="ms" collectionType="static" />
+    </metrics>
+
+    <metrics name="Data Source Metrics">
+        <metric name="Availability" indicator="true" />
+        <metric name="Current Number of Active Connections" alias="numActive" indicator="true"
+                template="${OBJECT_NAME}:${alias}" units="none" />
+        <metric name="Current Number of Idle Connections" alias="numIdle" indicator="true"
+                template="${OBJECT_NAME}:${alias}" units="none" />
+        <metric name="Maximum Open Prepared Statements" alias="maxOpenPreparedStatements" indicator="false"
+                template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+        <metric name="Maximum Wait" alias="maxWait" indicator="false"
+                template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+        <metric name="Minimum Evictable Idle Time milliseconds" alias="minEvictableIdleTimeMillis" indicator="false"
+                template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="ms" />
+        <metric name="Percent Active Connections" alias="percentActiveConnections" indicator="false"
+                template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+    </metrics>
+
+    <server name="tcServer">
+        <property name="EXTENDS" value="Apache Tomcat" />
+        <property name="VERSION_FILE" value="**/tcServer\d?.jar" />
+        <property name="DEFAULT_PROGRAM" value="bin/tcruntime-ctl.sh" />
+        <plugin type="autoinventory" class="com.springsource.hq.plugin.tcserver.plugin.TcRuntimeDetector" />
+        <plugin type="measurement" class="com.springsource.hq.plugin.tcserver.plugin.TomcatMeasurementPlugin" />
+        <property name="domain" value="Catalina" />
+        <property name="OBJECT_NAME" value="java.lang:type=Runtime" />
+        <metrics include="Runtime Metrics" />
+        <property name="OBJECT_NAME" value="java.lang:type=Threading" />
+        <metrics include="Thread Metrics" />
+        <property name="OBJECT_NAME" value="java.lang:type=OperatingSystem" />
+        <metrics include="OS Metrics" />
+        <property name="memory" value="java.lang:type=Memory" />
+        <metric name="Heap Memory Used" units="B"
+                template="${memory}:Composite.HeapMemoryUsage.used"/>
+        <metric name="Heap Memory Committed" units="B"
+                template="${memory}:Composite.HeapMemoryUsage.committed"/>
+        <metric name="Heap Memory Max" units="B" collectionType="static"
+                template="${memory}:Composite.HeapMemoryUsage.max"/>
+        <metric name="Heap Memory Free" units="B" indicator="true"
+                template="${memory}:HeapMemoryUsage.free" interval="300000" />
+
+        <!-- derive installpath from -Dcatalina.base=... -->
+        <property name="PROC_HOME_PROPERTY" value="catalina.base" />
+
+        <config>
+            <option name="jmx.url" description="JMX URL to MBeanServer"
+                    default="service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi" />
+            <option name="jmx.username" description="JMX username"
+                    optional="true" default="admin" type="sensitive"/>
+            <option name="jmx.password" description="JMX password"
+                    optional="true" default="springsource" type="secret" />
+            <option name="ptql" description="PTQL for tc Server Process"
+                    default="State.Name.sw=java,Args.*.eq=-Dcatalina.base=%catalina.base%" />
+            <!-- catalina.base is the same as installpath, except catalina.base represents 
+            the exact argument on the process. So it will show the non-canonical version 
+            and installpath shows the canonical version. catalina.base is used for the 
+            ptql to find the process. -->
+            <option name="catalina.base" description="The location of the tc Server instance." />
+            <option name="catalina.home"
+                    description="The location of the binaries for this tc Server instance." />
+            <option name="process.username"
+                    description="The name of the user that should run the tc Server instance." />
+            <option name="process.group"
+                    description="The group that should own war files deployed to the instance." />
+            <option name="listen.ports" description="Listening ports for ths instance."
+                    optional="true" />
+            <option name="process.query" default="%ptql%"
+                    description="PTQL for tc Runtime Java Process" />
+            <option name="tcversion" default=""
+                    description="TCServer/Tomcat version" />
+        </config>
+
+        <metric name="Deadlocks Detected" template="java.lang:Deadlocks:deadlockedThreadCount"
+                indicator="true" units="none" interval="120000" />
+
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%ptql%:State"
+                indicator="true" />
+
+        <metric name="Percent Up Time in Garbage Collection" indicator="true"
+                units="none" template="java.lang:GC:percentUpTimeSpent" />
+
+        &process-metrics;
+
+
+        <service name="Data Source Context" model="lightweight">
+            <property name="OBJECT_NAME"
+                      value="${domain}:type=DataSource,context=*,host=*,class=javax.sql.DataSource,name=*" />
+            <plugin type="autoinventory" />
+            <metrics include="Data Source Metrics" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+                <option name="context" description="MBean 'context' attribute" default="" />
+                <option name="host" description="MBean 'host' attribute" default="" />
+            </config>
+            <properties>
+                <property description="Initial Size" name="initialSize" />
+                <property description="Maximum Active Connections" name="maxActive" />
+                <property description="Minimum Idle Connections" name="minIdle" />
+                <property description="Maximum Idle Connections" name="maxIdle" />
+                <property description="JDBC URL" name="url" />
+                <property description="Username" name="username" />
+            </properties>
+        </service>
+
+        <service name="Data Source Global" model="lightweight">
+            <property name="OBJECT_NAME"
+                      value="Catalina:type=DataSource,class=javax.sql.DataSource,name=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <metrics include="Data Source Metrics" />
+            <properties>
+                <property description="Initial Size" name="initialSize" />
+                <property description="Maximum Active Connections" name="maxActive" />
+                <property description="Minimum Idle Connections" name="minIdle" />
+                <property description="Maximum Idle Connections" name="maxIdle" />
+                <property description="JDBC URL" name="url" />
+                <property description="Username" name="username" />
+            </properties>
+        </service>
+
+        <service name="Garbage Collector">
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <property name="OBJECT_NAME" value="java.lang:type=GarbageCollector,name=*" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Collection Count" indicator="true" category="THROUGHPUT"
+                    collectionType="trendsup" />
+            <metric name="Collection Time" indicator="true" category="THROUGHPUT"
+                    collectionType="trendsup" />
+        </service>
+
+
+        <service name="Web Module Stats">
+            <property name="OBJECT_NAME"
+                      value="${domain}:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+                <option name="J2EEApplication" description="MBean 'J2EEApplication' attribute" default="" />
+                <option name="J2EEServer" description="MBean 'J2EEServer' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Processing Time" alias="processingTime" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="sec" />
+        </service>
+
+        <service name="Thread Pools">
+            <property name="OBJECT_NAME" value="${domain}:type=ThreadPool,name=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <properties>
+                <property description="Maximum Number of Threads" name="maxThreads" />
+            </properties>
+            <metric name="Availability" indicator="true" />
+            <metric name="Current Thread Count" alias="currentThreadCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Current Thread Busy" alias="currentThreadsBusy" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Percent Allocated Threads" alias="percentAllocatedThreads" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Percent Active Threads" alias="percentActiveThreads" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+        </service>
+
+        <service name="Executor">
+            <property name="OBJECT_NAME" value="${domain}:type=Executor,name=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Max Threads" alias="maxThreads" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Pool Size" alias="poolSize" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Active Count" alias="activeCount"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Queue Size" alias="queueSize" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+        </service>
+
+        <service name="Servlet Monitor" model="lightweight">
+            <property name="OBJECT_NAME"
+                      value="${domain}:j2eeType=Servlet,name=*,WebModule=*,J2EEApplication=*,J2EEServer=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+                <option name="WebModule" description="MBean 'WebModule' attribute" default="" />
+                <option name="J2EEApplication" description="MBean 'J2EEApplication' attribute" default="" />
+                <option name="J2EEServer" description="MBean 'J2EEServer' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Class Load Time" alias="classLoadTime" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Error Count" alias="errorCount" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Load Time" alias="loadTime" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" units="none" />
+            <metric name="Processing Time" alias="processingTime" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Request Count" alias="requestCount" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+        </service>
+
+        <service name="JSP Monitor">
+            <property name="OBJECT_NAME"
+                      value="${domain}:type=JspMonitor,name=jsp,WebModule=*,J2EEApplication=*,J2EEServer=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="WebModule" description="MBean 'WebModule' attribute" default="" />
+                <option name="J2EEApplication" description="MBean 'J2EEApplication' attribute" default="" />
+                <option name="J2EEServer" description="MBean 'J2EEServer' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="JSP Count" alias="jspCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="JSP Reload Count" alias="jspReloadCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup"
+                    units="none" />
+        </service>
+
+        <service name="Global Request Processor">
+            <property name="OBJECT_NAME"
+                      value="${domain}:type=GlobalRequestProcessor,name=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="name" description="MBean 'name' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Bytes Sent" alias="bytesSent" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Bytes Received" alias="bytesReceived" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Error Count" alias="errorCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Processing Time" alias="processingTime"
+                    indicator="true" template="${OBJECT_NAME}:${alias}" collectionType="trendsup"
+                    units="none" />
+            <metric name="Request Count" alias="requestCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+        </service>
+
+        <service name="Cache">
+            <property name="OBJECT_NAME" value="${domain}:type=Cache,host=*,context=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="host" description="MBean 'host' attribute" default="" />
+                <option name="context" description="MBean 'context' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Access Count" alias="accessCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Cache Max Size" alias="cacheMaxSize" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Cache Size" alias="cacheSize" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Desired Entry Access Ratio" alias="desiredEntryAccessRatio" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Hits Count" alias="hitsCount" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Max Allocate Iterations" alias="maxAllocateIterations" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Spare Not Found Entries" alias="spareNotFoundEntries" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+        </service>
+
+        <service name="Manager">
+            <property name="OBJECT_NAME" value="${domain}:type=Manager,context=*,host=*" />
+            <plugin type="autoinventory" />
+            <config>
+                <option name="host" description="MBean 'host' attribute" default="" />
+                <option name="context" description="MBean 'context' attribute" default="" />
+            </config>
+            <metric name="Availability" indicator="true" />
+            <metric name="Active Sessions" alias="activeSessions" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Expired Sessions" alias="expiredSessions" indicator="false" 
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Max Active" alias="maxActive" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Processing Time" alias="processingTime" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="sec" />
+            <metric name="Rejected Sessions" alias="rejectedSessions" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="trendsup" units="none" />
+            <metric name="Session Average Alive Time" alias="sessionAverageAliveTime" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="sec" />
+            <metric name="Session Counter" alias="sessionCounter" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Sessions Created per minute" alias="sessionCreateRate" indicator="true"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Sessions Destroyed per minute" alias="sessionExpireRate" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="none" />
+            <metric name="Session Max Alive Time" alias="sessionMaxAliveTime" indicator="false"
+                    template="${OBJECT_NAME}:${alias}" collectionType="dynamic" units="sec" />
+        </service>
+
+        <service name="HTTP" model="lightweight">
+            <config include="http" />
+            <metric name="Availability" indicator="true"
+                    template="${http.template}:${alias}" />
+            <metric name="Inbound Connections" indicator="false"
+                    template="${http.template}:${alias}" />
+            <metric name="Outbound Connections" indicator="false"
+                    template="${http.template}:${alias}" />
+        </service>
+
+        <service name="EM4J">
+            <property name="OBJECT_NAME"
+                      value="com.springsource.balloon:type=com.springsource.balloon.jmx.BalloonInternals" />
+            <plugin type="autoinventory" />
+
+            <filter name="balloonInternals"
+                    value="com.springsource.balloon:type=com.springsource.balloon.jmx.BalloonInternals" />
+
+            <filter name="jvmBalloonState"
+                    value="com.springsource.balloon:type=com.springsource.balloon.jmx.JvmBalloonState" />
+
+            <filter name="vmBalloonState"
+                    value="com.springsource.balloon:type=com.springsource.balloon.jmx.VmBalloonState" />
+
+            <plugin type="measurement" class="org.hyperic.hq.product.jmx.MxMeasurementPlugin" />
+
+            <metric name="Availability" indicator="true" />
+            <metric name="Potential Balloon Size Hard" indicator="ture"
+                    units="B" template="${balloonInternals}:${alias}" />
+            <metric name="Potential Balloon Size Soft" indicator="false"
+                    template="${balloonInternals}:${alias}" units="B"/>
+            <metric name="Potential Balloon Size Weak" indicator="false"
+                    template="${balloonInternals}:${alias}" units="B"/>
+            <metric name="Locked Balloon Bytes" indicator="ture"
+                    template="${balloonInternals}:${alias}" units="B"/>
+            <metric name="Tenured Balloon Bytes Per Sec" indicator="ture"
+                    template="${balloonInternals}:${alias}" units="B"/>
+            <metric name="Max Potential Balloon Size" indicator="true"
+                    template="${jvmBalloonState}:${alias}" units="B"/>
+            <metric name="Potential Balloon Size Tenured" indicator="ture"
+                    template="${jvmBalloonState}:${alias}" units="B"/>
+            <metric name="Potential Balloon Size Total" indicator="ture"
+                    template="${jvmBalloonState}:${alias}" units="B"/>
+            <metric name="Balloon Size" indicator="ture"
+                    template="${vmBalloonState}:${alias}" units="B"/>
+            <metric name="Balloon Target" indicator="true"
+                    template="${vmBalloonState}:${alias}" />
+        </service>
+
+    </server>
+</plugin>
