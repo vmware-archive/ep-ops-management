@@ -15,7 +15,7 @@
         <commons-logging.version>1.0.4</commons-logging.version>
         <commons-lang.version>2.5</commons-lang.version>
         <sigar.version>1.6.6.13</sigar.version>
-        <xstream.version>1.3.1</xstream.version>
+        <xstream.version>1.4.6</xstream.version>
         <icu4j.version>3.8</icu4j.version>
         <httpclient.version>4.1.1</httpclient.version>
         <animal-sniffer-maven-plugin.version>1.9</animal-sniffer-maven-plugin.version>
