@@ -18,7 +18,7 @@
         <commons.codec.version>1.6</commons.codec.version>
         <commons.collection.version>3.2.1</commons.collection.version>
         <junit.version>4.10</junit.version>
-        <httpclient.version>4.1.1</httpclient.version>
+        <httpclient.version>4.3.6</httpclient.version>
         <animal-sniffer-maven-plugin.version>1.9</animal-sniffer-maven-plugin.version>
         <java16-codehaus-signature.version>1.0</java16-codehaus-signature.version>    
     </properties>
