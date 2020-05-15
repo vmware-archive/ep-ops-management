@@ -40,7 +40,7 @@
     <jdom.version>1.1</jdom.version>
     <oro.version>2.0.8</oro.version>
     <httpclient.version>4.4</httpclient.version>
-    <jackson.version>2.3.2</jackson.version>
+    <jackson.version>2.9.10.4</jackson.version>
     <war.name>epops-webapp</war.name>
   </properties>
 
